@@ -1,0 +1,38 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: editorialDocumentPreviewer\n"
+"POT-Creation-Date: 2026-10-05 16:40+0700\n"
+"PO-Revision-Date: 2026-10-05 16:40+0700\n"
+"Last-Translator: Dhimas Rizky H\n"
+"Language-Team: Indonesian\n"
+"Language: id\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+msgid "plugins.generic.editorialDocumentPreviewer.name"
+msgstr "Editorial Document Previewer"
+
+msgid "plugins.generic.editorialDocumentPreviewer.description"
+msgstr "Memungkinkan pratinjau dokumen naskah dan file lampiran langsung di peramban pada seluruh tahapan alur kerja editorial tanpa perlu mengunduh file."
+
+msgid "plugins.generic.editorialDocumentPreviewer.previewButton"
+msgstr "Pratinjau Cepat"
+
+msgid "plugins.generic.editorialDocumentPreviewer.previewTitle"
+msgstr "Pratinjau Dokumen"
+
+msgid "plugins.generic.editorialDocumentPreviewer.downloadFile"
+msgstr "Unduh Berkas Asli"
+
+msgid "plugins.generic.editorialDocumentPreviewer.closePreview"
+msgstr "Tutup Pratinjau"
+
+msgid "plugins.generic.editorialDocumentPreviewer.loading"
+msgstr "Memuat pratinjau dokumen..."
+
+msgid "plugins.generic.editorialDocumentPreviewer.unsupportedFormat"
+msgstr "Pratinjau belum didukung untuk format berkas ini. Silakan unduh berkas untuk membukanya secara lokal."
+
+msgid "plugins.generic.editorialDocumentPreviewer.unauthorized"
+msgstr "Anda tidak memiliki otorisasi untuk melihat pratinjau dokumen ini."

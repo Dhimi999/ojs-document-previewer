@@ -1,0 +1,38 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: editorialDocumentPreviewer\n"
+"POT-Creation-Date: 2026-10-05 16:40+0700\n"
+"PO-Revision-Date: 2026-10-05 16:40+0700\n"
+"Last-Translator: Dhimas Rizky H\n"
+"Language-Team: English\n"
+"Language: en\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+msgid "plugins.generic.editorialDocumentPreviewer.name"
+msgstr "Editorial Document Previewer"
+
+msgid "plugins.generic.editorialDocumentPreviewer.description"
+msgstr "Enables instant in-browser modal previews for submitted documents, manuscripts, and supplementary files across all editorial workflow stages without downloading files."
+
+msgid "plugins.generic.editorialDocumentPreviewer.previewButton"
+msgstr "Quick Preview"
+
+msgid "plugins.generic.editorialDocumentPreviewer.previewTitle"
+msgstr "Document Preview"
+
+msgid "plugins.generic.editorialDocumentPreviewer.downloadFile"
+msgstr "Download Original"
+
+msgid "plugins.generic.editorialDocumentPreviewer.closePreview"
+msgstr "Close Preview"
+
+msgid "plugins.generic.editorialDocumentPreviewer.loading"
+msgstr "Loading document preview..."
+
+msgid "plugins.generic.editorialDocumentPreviewer.unsupportedFormat"
+msgstr "Preview is not available for this file format. Please download the file to inspect its contents."
+
+msgid "plugins.generic.editorialDocumentPreviewer.unauthorized"
+msgstr "You are not authorized to preview this document."

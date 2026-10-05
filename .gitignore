@@ -1,0 +1,26 @@
+# Composer / Dependencies
+/vendor/
+/node_modules/
+
+# Build artifacts & packages
+*.tar.gz
+*.zip
+*.phar
+
+# Operating System Files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# IDE & Editor Files
+.idea/
+.vscode/
+*.sublime-project
+*.sublime-workspace
+*.swp
+*~
+
+# Logs & Temporary Files
+*.log
+/cache/
+/tmp/
