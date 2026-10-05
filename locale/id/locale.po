@@ -17,7 +17,7 @@ msgid "plugins.generic.editorialDocumentPreviewer.description"
 msgstr "Memungkinkan pratinjau dokumen naskah dan file lampiran langsung di peramban pada seluruh tahapan alur kerja editorial tanpa perlu mengunduh file."
 
 msgid "plugins.generic.editorialDocumentPreviewer.previewButton"
-msgstr "Pratinjau Cepat"
+msgstr "Pratinjau"
 
 msgid "plugins.generic.editorialDocumentPreviewer.previewTitle"
 msgstr "Pratinjau Dokumen"
@@ -32,7 +32,28 @@ msgid "plugins.generic.editorialDocumentPreviewer.loading"
 msgstr "Memuat pratinjau dokumen..."
 
 msgid "plugins.generic.editorialDocumentPreviewer.unsupportedFormat"
-msgstr "Pratinjau belum didukung untuk format berkas ini. Silakan unduh berkas untuk membukanya secara lokal."
+msgstr "Pratinjau langsung belum didukung untuk format berkas ini. Silakan unduh berkas untuk membukanya secara lokal."
 
 msgid "plugins.generic.editorialDocumentPreviewer.unauthorized"
 msgstr "Anda tidak memiliki otorisasi untuk melihat pratinjau dokumen ini."
+
+msgid "plugins.generic.editorialDocumentPreviewer.openInNewTab"
+msgstr "Buka di Tab Baru"
+
+msgid "plugins.generic.editorialDocumentPreviewer.zoomIn"
+msgstr "Perbesar"
+
+msgid "plugins.generic.editorialDocumentPreviewer.zoomOut"
+msgstr "Perkecil"
+
+msgid "plugins.generic.editorialDocumentPreviewer.resetZoom"
+msgstr "Atur Ulang Zoom"
+
+msgid "plugins.generic.editorialDocumentPreviewer.fitWidth"
+msgstr "Sesuaikan Lebar"
+
+msgid "plugins.generic.editorialDocumentPreviewer.fullScreen"
+msgstr "Layar Penuh"
+
+msgid "plugins.generic.editorialDocumentPreviewer.exitFullScreen"
+msgstr "Keluar Layar Penuh"
