@@ -1,0 +1,5 @@
+# Export ignore rules for release archives
+.gitignore export-ignore
+.gitattributes export-ignore
+*.tar.gz export-ignore
+*.zip export-ignore
