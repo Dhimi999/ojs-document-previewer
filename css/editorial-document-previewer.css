@@ -6,45 +6,56 @@
  */
 
 /* -------------------------------------------------------------------------
+   BODY SCROLL LOCK (Prevents background layer scroll while preview is active)
+   ------------------------------------------------------------------------- */
+body.edp-lock-scroll {
+    overflow: hidden !important;
+    touch-action: none !important;
+}
+
+/* -------------------------------------------------------------------------
    FILE ROW TRIGGER BUTTON
    ------------------------------------------------------------------------- */
 .edp-preview-trigger {
-    display: inline-flex;
-    align-items: center;
-    gap: 4px;
-    padding: 2px 7px;
-    margin-left: 6px;
-    font-size: 11px;
-    font-weight: 600;
-    line-height: 1.5;
-    color: #006798;
-    background: #eef6fc;
-    border: 1px solid #c5def5;
-    border-radius: 4px;
-    cursor: pointer;
-    text-decoration: none;
-    transition: all 0.15s ease-in-out;
-    vertical-align: middle;
-    white-space: nowrap;
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 4px !important;
+    padding: 2px 7px !important;
+    margin-right: 6px !important;
+    margin-left: 0 !important;
+    font-size: 11px !important;
+    font-weight: 600 !important;
+    line-height: 1.5 !important;
+    color: #006798 !important;
+    background: #eef6fc !important;
+    border: 1px solid #c5def5 !important;
+    border-radius: 4px !important;
+    cursor: pointer !important;
+    text-decoration: none !important;
+    transition: all 0.15s ease-in-out !important;
+    vertical-align: middle !important;
+    white-space: nowrap !important;
+    flex-shrink: 0 !important;
+    box-sizing: border-box !important;
 }
 
 .edp-preview-trigger:hover {
-    background: #006798;
-    color: #ffffff;
-    border-color: #006798;
-    box-shadow: 0 1px 3px rgba(0, 103, 152, 0.25);
+    background: #006798 !important;
+    color: #ffffff !important;
+    border-color: #006798 !important;
+    box-shadow: 0 1px 3px rgba(0, 103, 152, 0.25) !important;
 }
 
 .edp-preview-trigger:focus-visible {
-    outline: 2px solid #006798;
-    outline-offset: 1px;
+    outline: 2px solid #006798 !important;
+    outline-offset: 1px !important;
 }
 
 .edp-preview-trigger svg {
-    width: 13px;
-    height: 13px;
-    fill: currentColor;
-    flex-shrink: 0;
+    width: 13px !important;
+    height: 13px !important;
+    fill: currentColor !important;
+    flex-shrink: 0 !important;
 }
 
 /* -------------------------------------------------------------------------
@@ -59,7 +70,7 @@
     background: rgba(15, 23, 42, 0.78);
     backdrop-filter: blur(4px);
     -webkit-backdrop-filter: blur(4px);
-    z-index: 999999;
+    z-index: 10000000 !important;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -467,6 +478,17 @@
 /* -------------------------------------------------------------------------
    RESPONSIVE ADJUSTMENTS
    ------------------------------------------------------------------------- */
+@media (max-width: 900px) {
+    .edp-preview-trigger {
+        padding: 3px 5px !important;
+        margin-right: 4px !important;
+    }
+
+    .edp-preview-trigger span {
+        display: none !important;
+    }
+}
+
 @media (max-width: 768px) {
     .edp-modal-dialog {
         width: 100vw;

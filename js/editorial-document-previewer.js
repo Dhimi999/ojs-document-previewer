@@ -74,11 +74,11 @@
                         </div>
                         <div class="edp-modal-actions">
                             <div id="edp-viewer-controls" class="edp-viewer-controls" style="display:none;"></div>
-                            <a id="edp-btn-newtab" href="#" class="edp-btn edp-btn-newtab" target="_blank" rel="noopener" style="display:none;" title="${this.t('openInNewTab', 'Open in New Tab')}">
+                            <a id="edp-btn-newtab" href="#" class="edp-btn edp-btn-newtab edp-ignore-link" data-edp-bound="true" data-edp-internal="true" target="_blank" rel="noopener" style="display:none;" title="${this.t('openInNewTab', 'Open in New Tab')}">
                                 <svg viewBox="0 0 24 24"><path d="M19 19H5V5h7V3H5c-1.11 0-2 .9-2 2v14c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2v-7h-2v7zM14 3v2h3.59l-9.83 9.83 1.41 1.41L19 6.41V10h2V3h-7z"/></svg>
                                 <span>${this.t('openInNewTab', 'Open in New Tab')}</span>
                             </a>
-                            <a id="edp-btn-download" href="#" class="edp-btn edp-btn-download" target="_blank" rel="noopener" title="${this.t('downloadFile', 'Download Original')}">
+                            <a id="edp-btn-download" href="#" class="edp-btn edp-btn-download edp-ignore-link" data-edp-bound="true" data-edp-internal="true" target="_blank" rel="noopener" title="${this.t('downloadFile', 'Download Original')}">
                                 <svg viewBox="0 0 24 24"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg>
                                 <span>${this.t('downloadFile', 'Download')}</span>
                             </a>
@@ -111,19 +111,45 @@
             this.btnFullscreen = overlay.querySelector('#edp-btn-fullscreen');
             this.modalBody = overlay.querySelector('#edp-modal-body');
 
-            // Event bindings
-            overlay.querySelector('#edp-btn-close').addEventListener('click', () => this.close());
-            this.btnFullscreen.addEventListener('click', () => this.toggleFullscreen());
-
-            overlay.addEventListener('click', (e) => {
-                if (e.target === overlay) this.close();
+            // 1. ISOLATE MODAL EVENTS: Stop propagation to prevent OJS layer/slideout panels from closing
+            const stopPropagation = (e) => {
+                e.stopPropagation();
+            };
+            ['click', 'mousedown', 'mouseup', 'pointerdown', 'pointerup', 'touchstart', 'touchend', 'wheel', 'contextmenu'].forEach((evt) => {
+                overlay.addEventListener(evt, stopPropagation);
             });
 
-            document.addEventListener('keydown', (e) => {
-                if (e.key === 'Escape' && this.modal.classList.contains('edp-active')) {
+            // 2. Close bindings
+            overlay.querySelector('#edp-btn-close').addEventListener('click', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                this.close();
+            });
+
+            this.btnFullscreen.addEventListener('click', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                this.toggleFullscreen();
+            });
+
+            // Backdrop click closes preview modal without bubbling to OJS
+            overlay.addEventListener('click', (e) => {
+                if (e.target === overlay) {
+                    e.preventDefault();
+                    e.stopPropagation();
                     this.close();
                 }
             });
+
+            // Capture-phase keydown listener for Escape: prevents OJS background modal from closing
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape' && this.modal && this.modal.classList.contains('edp-active')) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    e.stopImmediatePropagation();
+                    this.close();
+                }
+            }, true);
         }
 
         toggleFullscreen() {
@@ -249,6 +275,10 @@
             );
 
             fileLinks.forEach((link) => {
+                // GUARD: Strictly ignore links inside the preview modal dialog or marked internal
+                if (link.closest('#edp-previewer-overlay') || link.closest('.edp-modal-dialog')) return;
+                if (link.dataset.edpInternal || link.classList.contains('edp-ignore-link')) return;
+
                 if (link.dataset.edpBound) return;
                 link.dataset.edpBound = 'true';
 
@@ -260,6 +290,12 @@
                 btn.type = 'button';
                 btn.className = 'edp-preview-trigger';
                 btn.setAttribute('title', `${this.t('previewButton', 'Preview')} ${meta.fileName}`);
+
+                // Bind target file data directly to the button dataset to avoid cross-talk
+                btn.dataset.targetFileName = meta.fileName;
+                btn.dataset.targetFileExt = meta.extension;
+                btn.dataset.targetFileUrl = fileUrl;
+
                 btn.innerHTML = `
                     <svg viewBox="0 0 24 24"><path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/></svg>
                     <span>${this.t('previewButton', 'Preview')}</span>
@@ -268,15 +304,11 @@
                 btn.addEventListener('click', (e) => {
                     e.preventDefault();
                     e.stopPropagation();
-                    this.open(meta.fileName, meta.extension, fileUrl, link);
+                    this.open(btn.dataset.targetFileName, btn.dataset.targetFileExt, btn.dataset.targetFileUrl);
                 });
 
-                // Insert preview button immediately following the file link
-                if (link.nextSibling) {
-                    link.parentNode.insertBefore(btn, link.nextSibling);
-                } else {
-                    link.parentNode.appendChild(btn);
-                }
+                // Insert button BEFORE the link so it is never pushed off by text-overflow ellipsis
+                link.parentNode.insertBefore(btn, link);
             });
         }
 
@@ -294,7 +326,7 @@
             });
         }
 
-        open(initialFileName, initialExt, fileUrl, linkElement) {
+        open(initialFileName, initialExt, fileUrl) {
             this.cleanupBlob();
 
             this.currentFileName = initialFileName || 'Document Preview';
@@ -305,6 +337,9 @@
             this.modalTitle.textContent = this.currentFileName;
             this.btnDownload.href = this.currentFileUrl;
             this.updateFormatBadge(this.currentFileType);
+
+            // Lock background body scrolling so OJS layer panels do not scroll or close
+            document.body.classList.add('edp-lock-scroll');
 
             // Open overlay
             this.modal.classList.add('edp-active');
@@ -467,9 +502,18 @@
                 zoomLabel.textContent = `${Math.round(this.currentScale * 100)}%`;
             };
 
-            zoomInBtn.addEventListener('click', () => applyZoom(this.currentScale + 0.1));
-            zoomOutBtn.addEventListener('click', () => applyZoom(this.currentScale - 0.1));
-            fitBtn.addEventListener('click', () => applyZoom(1.0));
+            zoomInBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                applyZoom(this.currentScale + 0.1);
+            });
+            zoomOutBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                applyZoom(this.currentScale - 0.1);
+            });
+            fitBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                applyZoom(1.0);
+            });
         }
 
         /* -----------------------------------------------------------------
@@ -543,12 +587,22 @@
                 badge.textContent = `${img.naturalWidth} × ${img.naturalHeight} px (${Math.round(this.currentScale * 100)}%)`;
             };
 
-            zoomInBtn.addEventListener('click', () => applyZoom(this.currentScale + 0.25));
-            zoomOutBtn.addEventListener('click', () => applyZoom(this.currentScale - 0.25));
-            resetBtn.addEventListener('click', () => applyZoom(1.0));
+            zoomInBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                applyZoom(this.currentScale + 0.25);
+            });
+            zoomOutBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                applyZoom(this.currentScale - 0.25);
+            });
+            resetBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                applyZoom(1.0);
+            });
 
             // Click-to-zoom toggle
-            img.addEventListener('click', () => {
+            img.addEventListener('click', (e) => {
+                e.stopPropagation();
                 applyZoom(this.currentScale === 1.0 ? 2.0 : 1.0);
             });
         }
@@ -595,6 +649,10 @@
             if (this.isFullscreen) {
                 this.toggleFullscreen();
             }
+
+            // Restore body scroll
+            document.body.classList.remove('edp-lock-scroll');
+
             this.modalBody.innerHTML = '';
             this.viewerControls.style.display = 'none';
             this.viewerControls.innerHTML = '';
