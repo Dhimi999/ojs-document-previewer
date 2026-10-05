@@ -1,8 +1,8 @@
 msgid ""
 msgstr ""
-"Project-Id-Version: editorialDocumentPreviewer 0.2.2.0\n"
+"Project-Id-Version: editorialDocumentPreviewer 0.2.3.0\n"
 "POT-Creation-Date: 2026-10-05 16:40+0700\n"
-"PO-Revision-Date: 2026-10-05 19:15+0700\n"
+"PO-Revision-Date: 2026-10-05 19:40+0700\n"
 "Last-Translator: Dhimas Rizky H\n"
 "Language-Team: English\n"
 "Language: en\n"
@@ -57,3 +57,24 @@ msgstr "Full Screen"
 
 msgid "plugins.generic.editorialDocumentPreviewer.exitFullScreen"
 msgstr "Exit Full Screen"
+
+msgid "plugins.generic.editorialDocumentPreviewer.docxNoticeTitle"
+msgstr "DOCX Document Preview"
+
+msgid "plugins.generic.editorialDocumentPreviewer.docxNoticeDesc"
+msgstr "This preview is rendered directly in your browser for speed and strict manuscript confidentiality (100% client-side without third-party servers). Complex formatting, pagination, line numbering, or advanced equations may differ slightly from Microsoft Word desktop."
+
+msgid "plugins.generic.editorialDocumentPreviewer.docxNoticeActionPreview"
+msgstr "Continue to Preview"
+
+msgid "plugins.generic.editorialDocumentPreviewer.docxNoticeActionDownload"
+msgstr "Download Original (.docx)"
+
+msgid "plugins.generic.editorialDocumentPreviewer.docxNoticeRemember"
+msgstr "Remember my choice (do not show this again)"
+
+msgid "plugins.generic.editorialDocumentPreviewer.docxNoticeBanner"
+msgstr "Quick in-browser preview. For 100% exact layout fidelity, download the original file or use Print / Save as PDF."
+
+msgid "plugins.generic.editorialDocumentPreviewer.printPdf"
+msgstr "Print / Save as PDF"

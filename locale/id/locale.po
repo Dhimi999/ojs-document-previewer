@@ -1,8 +1,8 @@
 msgid ""
 msgstr ""
-"Project-Id-Version: editorialDocumentPreviewer 0.2.2.0\n"
+"Project-Id-Version: editorialDocumentPreviewer 0.2.3.0\n"
 "POT-Creation-Date: 2026-10-05 16:40+0700\n"
-"PO-Revision-Date: 2026-10-05 19:15+0700\n"
+"PO-Revision-Date: 2026-10-05 19:40+0700\n"
 "Last-Translator: Dhimas Rizky H\n"
 "Language-Team: Indonesian\n"
 "Language: id\n"
@@ -57,3 +57,24 @@ msgstr "Layar Penuh"
 
 msgid "plugins.generic.editorialDocumentPreviewer.exitFullScreen"
 msgstr "Keluar Layar Penuh"
+
+msgid "plugins.generic.editorialDocumentPreviewer.docxNoticeTitle"
+msgstr "Pemberitahuan Pratinjau DOCX"
+
+msgid "plugins.generic.editorialDocumentPreviewer.docxNoticeDesc"
+msgstr "Pratinjau ini diproses langsung di peramban demi kecepatan dan menjaga kerahasiaan naskah (100% lokal tanpa server pihak ketiga). Pemformatan kompleks, penomoran baris, atau tata letak halaman asli dapat sedikit berbeda dibanding Microsoft Word desktop."
+
+msgid "plugins.generic.editorialDocumentPreviewer.docxNoticeActionPreview"
+msgstr "Lanjutkan Pratinjau"
+
+msgid "plugins.generic.editorialDocumentPreviewer.docxNoticeActionDownload"
+msgstr "Unduh Berkas Asli (.docx)"
+
+msgid "plugins.generic.editorialDocumentPreviewer.docxNoticeRemember"
+msgstr "Ingat pilihan saya (jangan tampilkan lagi)"
+
+msgid "plugins.generic.editorialDocumentPreviewer.docxNoticeBanner"
+msgstr "Pratinjau cepat peramban. Untuk memeriksa tata letak 100% presisi, unduh berkas asli atau gunakan opsi Cetak / Simpan ke PDF."
+
+msgid "plugins.generic.editorialDocumentPreviewer.printPdf"
+msgstr "Cetak / Simpan ke PDF"

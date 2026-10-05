@@ -100,6 +100,13 @@ class EditorialDocumentPreviewerPlugin extends GenericPlugin
                     'fitWidth' => __('plugins.generic.editorialDocumentPreviewer.fitWidth'),
                     'fullScreen' => __('plugins.generic.editorialDocumentPreviewer.fullScreen'),
                     'exitFullScreen' => __('plugins.generic.editorialDocumentPreviewer.exitFullScreen'),
+                    'docxNoticeTitle' => __('plugins.generic.editorialDocumentPreviewer.docxNoticeTitle'),
+                    'docxNoticeDesc' => __('plugins.generic.editorialDocumentPreviewer.docxNoticeDesc'),
+                    'docxNoticeActionPreview' => __('plugins.generic.editorialDocumentPreviewer.docxNoticeActionPreview'),
+                    'docxNoticeActionDownload' => __('plugins.generic.editorialDocumentPreviewer.docxNoticeActionDownload'),
+                    'docxNoticeRemember' => __('plugins.generic.editorialDocumentPreviewer.docxNoticeRemember'),
+                    'docxNoticeBanner' => __('plugins.generic.editorialDocumentPreviewer.docxNoticeBanner'),
+                    'printPdf' => __('plugins.generic.editorialDocumentPreviewer.printPdf'),
                 ],
             ];
 

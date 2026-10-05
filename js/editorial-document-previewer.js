@@ -1,8 +1,8 @@
 /**
  * Editorial Document Previewer Client Script
  *
+ * PKP / OJS Editorial Standards (GPL v3)
  * Copyright (c) 2026 Dhimas Rizky H / JRTN
- * Distributed under the GNU GPL v3. For full terms see the file LICENSE.
  */
 
 (function () {
@@ -11,15 +11,28 @@
     class EditorialDocumentPreviewer {
         constructor() {
             this.config = window.edpConfig || {};
+
+            // Main Modal Elements
             this.modal = null;
             this.modalDialog = null;
             this.modalTitle = null;
             this.formatBadge = null;
             this.viewerControls = null;
+            this.btnPrint = null;
             this.btnNewTab = null;
             this.btnDownload = null;
             this.btnFullscreen = null;
             this.modalBody = null;
+            this.docxBanner = null;
+            this.bannerBtnDownload = null;
+
+            // DOCX Editorial Notice Modal Elements
+            this.docxNoticeOverlay = null;
+            this.docxNoticeCheckbox = null;
+            this.docxNoticeDownloadBtn = null;
+            this.docxNoticeContinueBtn = null;
+            this.docxNoticeCloseBtn = null;
+            this.pendingDocxParams = null;
 
             // Viewer runtime state
             this.currentScale = 1.0;
@@ -43,6 +56,7 @@
 
         boot() {
             this.createModal();
+            this.createDocxNoticeModal();
             this.attachMutationObserver();
             this.scanAndInjectButtons();
         }
@@ -74,6 +88,10 @@
                         </div>
                         <div class="edp-modal-actions">
                             <div id="edp-viewer-controls" class="edp-viewer-controls" style="display:none;"></div>
+                            <button id="edp-btn-print" type="button" class="edp-btn edp-btn-print" style="display:none;" title="${this.t('printPdf', 'Print / Save as PDF')}">
+                                <svg viewBox="0 0 24 24"><path d="M19 8H5c-1.66 0-3 1.34-3 3v6h4v4h12v-4h4v-6c0-1.66-1.34-3-3-3zm-3 11H8v-5h8v5zm3-7c-.55 0-1-.45-1-1s.45-1 1-1 1 .45 1 1-.45 1-1 1zm-1-9H6v4h12V3z"/></svg>
+                                <span>${this.t('printPdf', 'Print / PDF')}</span>
+                            </button>
                             <a id="edp-btn-newtab" href="#" class="edp-btn edp-btn-newtab edp-ignore-link" data-edp-bound="true" data-edp-internal="true" target="_blank" rel="noopener" style="display:none;" title="${this.t('openInNewTab', 'Open in New Tab')}">
                                 <svg viewBox="0 0 24 24"><path d="M19 19H5V5h7V3H5c-1.11 0-2 .9-2 2v14c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2v-7h-2v7zM14 3v2h3.59l-9.83 9.83 1.41 1.41L19 6.41V10h2V3h-7z"/></svg>
                                 <span>${this.t('openInNewTab', 'Open in New Tab')}</span>
@@ -90,6 +108,25 @@
                             </button>
                         </div>
                     </div>
+
+                    <div id="edp-docx-banner" class="edp-docx-banner" style="display:none;">
+                        <div class="edp-docx-banner-content">
+                            <svg class="edp-docx-banner-icon" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/></svg>
+                            <span class="edp-docx-banner-text">${this.t('docxNoticeBanner', 'Quick in-browser preview. For 100% exact layout fidelity, download the original file or use Print / Save as PDF.')}</span>
+                        </div>
+                        <div class="edp-docx-banner-actions">
+                            <button type="button" id="edp-banner-btn-print" class="edp-docx-banner-btn">
+                                <svg viewBox="0 0 24 24"><path d="M19 8H5c-1.66 0-3 1.34-3 3v6h4v4h12v-4h4v-6c0-1.66-1.34-3-3-3zm-3 11H8v-5h8v5zm3-7c-.55 0-1-.45-1-1s.45-1 1-1 1 .45 1 1-.45 1-1 1zm-1-9H6v4h12V3z"/></svg>
+                                <span>${this.t('printPdf', 'Print / PDF')}</span>
+                            </button>
+                            <a id="edp-banner-btn-download" href="#" class="edp-docx-banner-btn edp-ignore-link" data-edp-bound="true" data-edp-internal="true" target="_blank" rel="noopener">
+                                <svg viewBox="0 0 24 24"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg>
+                                <span>${this.t('downloadFile', 'Download')}</span>
+                            </a>
+                            <button type="button" id="edp-docx-banner-dismiss" class="edp-docx-banner-dismiss" title="Dismiss">&times;</button>
+                        </div>
+                    </div>
+
                     <div id="edp-modal-body" class="edp-modal-body">
                         <div class="edp-loading-indicator">
                             <div class="edp-spinner"></div>
@@ -106,12 +143,15 @@
             this.modalTitle = overlay.querySelector('#edp-modal-title');
             this.formatBadge = overlay.querySelector('#edp-format-badge');
             this.viewerControls = overlay.querySelector('#edp-viewer-controls');
+            this.btnPrint = overlay.querySelector('#edp-btn-print');
             this.btnNewTab = overlay.querySelector('#edp-btn-newtab');
             this.btnDownload = overlay.querySelector('#edp-btn-download');
             this.btnFullscreen = overlay.querySelector('#edp-btn-fullscreen');
             this.modalBody = overlay.querySelector('#edp-modal-body');
+            this.docxBanner = overlay.querySelector('#edp-docx-banner');
+            this.bannerBtnDownload = overlay.querySelector('#edp-banner-btn-download');
 
-            // 1. ISOLATE MODAL EVENTS: Stop propagation to prevent OJS layer/slideout panels from closing
+            // 1. ISOLATE MODAL EVENTS: Stop propagation to prevent OJS background panels from closing
             const stopPropagation = (e) => {
                 e.stopPropagation();
             };
@@ -119,17 +159,36 @@
                 overlay.addEventListener(evt, stopPropagation);
             });
 
-            // 2. Close bindings
+            // 2. Toolbar action bindings
             overlay.querySelector('#edp-btn-close').addEventListener('click', (e) => {
                 e.preventDefault();
                 e.stopPropagation();
                 this.close();
             });
 
+            this.btnPrint.addEventListener('click', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                window.print();
+            });
+
             this.btnFullscreen.addEventListener('click', (e) => {
                 e.preventDefault();
                 e.stopPropagation();
                 this.toggleFullscreen();
+            });
+
+            // Banner action bindings
+            overlay.querySelector('#edp-banner-btn-print').addEventListener('click', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                window.print();
+            });
+
+            overlay.querySelector('#edp-docx-banner-dismiss').addEventListener('click', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                this.docxBanner.style.display = 'none';
             });
 
             // Backdrop click closes preview modal without bubbling to OJS
@@ -141,15 +200,136 @@
                 }
             });
 
-            // Capture-phase keydown listener for Escape: prevents OJS background modal from closing
+            // Capture-phase keydown listener for Escape
             document.addEventListener('keydown', (e) => {
-                if (e.key === 'Escape' && this.modal && this.modal.classList.contains('edp-active')) {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    e.stopImmediatePropagation();
-                    this.close();
+                if (e.key === 'Escape') {
+                    if (this.docxNoticeOverlay && this.docxNoticeOverlay.classList.contains('edp-active')) {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        e.stopImmediatePropagation();
+                        this.closeDocxNotice();
+                        return;
+                    }
+                    if (this.modal && this.modal.classList.contains('edp-active')) {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        e.stopImmediatePropagation();
+                        this.close();
+                        return;
+                    }
                 }
             }, true);
+        }
+
+        createDocxNoticeModal() {
+            if (document.getElementById('edp-docx-notice-overlay')) return;
+
+            const overlay = document.createElement('div');
+            overlay.id = 'edp-docx-notice-overlay';
+            overlay.className = 'edp-docx-notice-overlay';
+            overlay.innerHTML = `
+                <div class="edp-docx-notice-dialog" role="dialog" aria-modal="true" aria-labelledby="edp-notice-title">
+                    <div class="edp-docx-notice-header">
+                        <div class="edp-docx-notice-title-group">
+                            <svg viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z"/>
+                            </svg>
+                            <h4 id="edp-notice-title" class="edp-docx-notice-title">${this.t('docxNoticeTitle', 'DOCX Document Preview')}</h4>
+                        </div>
+                        <button type="button" id="edp-notice-close-btn" class="edp-docx-notice-close" title="${this.t('closePreview', 'Close')}">&times;</button>
+                    </div>
+                    <div class="edp-docx-notice-body">
+                        <div class="edp-docx-notice-callout">
+                            ${this.t('docxNoticeDesc', 'This preview is rendered directly in your browser for speed and strict manuscript confidentiality (100% client-side without third-party servers). Complex formatting, pagination, line numbering, or advanced equations may differ slightly from Microsoft Word desktop.')}
+                        </div>
+                        <label class="edp-docx-notice-checkbox-label">
+                            <input type="checkbox" id="edp-docx-remember-checkbox">
+                            <span>${this.t('docxNoticeRemember', 'Remember my choice (do not show this again)')}</span>
+                        </label>
+                    </div>
+                    <div class="edp-docx-notice-footer">
+                        <a id="edp-notice-download-btn" href="#" class="edp-btn edp-ignore-link" data-edp-bound="true" data-edp-internal="true" target="_blank" rel="noopener">
+                            <svg viewBox="0 0 24 24"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg>
+                            <span>${this.t('docxNoticeActionDownload', 'Download Original (.docx)')}</span>
+                        </a>
+                        <button type="button" id="edp-notice-continue-btn" class="edp-btn edp-btn-download">
+                            <span>${this.t('docxNoticeActionPreview', 'Continue to Preview')}</span>
+                        </button>
+                    </div>
+                </div>
+            `;
+
+            document.body.appendChild(overlay);
+
+            this.docxNoticeOverlay = overlay;
+            this.docxNoticeCheckbox = overlay.querySelector('#edp-docx-remember-checkbox');
+            this.docxNoticeDownloadBtn = overlay.querySelector('#edp-notice-download-btn');
+            this.docxNoticeContinueBtn = overlay.querySelector('#edp-notice-continue-btn');
+            this.docxNoticeCloseBtn = overlay.querySelector('#edp-notice-close-btn');
+
+            // Event isolation
+            const stopPropagation = (e) => e.stopPropagation();
+            ['click', 'mousedown', 'mouseup', 'pointerdown', 'pointerup', 'touchstart', 'touchend', 'wheel'].forEach((evt) => {
+                overlay.addEventListener(evt, stopPropagation);
+            });
+
+            this.docxNoticeCloseBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                this.closeDocxNotice();
+            });
+
+            overlay.addEventListener('click', (e) => {
+                if (e.target === overlay) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    this.closeDocxNotice();
+                }
+            });
+
+            this.docxNoticeContinueBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                if (this.docxNoticeCheckbox.checked) {
+                    try {
+                        localStorage.setItem('edp_docx_notice_dismissed', 'true');
+                    } catch (err) {}
+                }
+                const params = this.pendingDocxParams;
+                this.closeDocxNotice();
+                if (params) {
+                    this.open(params.fileName, params.ext, params.fileUrl);
+                }
+            });
+
+            this.docxNoticeDownloadBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                if (this.docxNoticeCheckbox.checked) {
+                    try {
+                        localStorage.setItem('edp_docx_notice_dismissed', 'true');
+                    } catch (err) {}
+                }
+                this.closeDocxNotice();
+            });
+        }
+
+        showDocxNotice(fileName, ext, fileUrl) {
+            this.pendingDocxParams = { fileName, ext, fileUrl };
+            this.docxNoticeDownloadBtn.href = fileUrl;
+            this.docxNoticeCheckbox.checked = false;
+
+            document.body.classList.add('edp-lock-scroll');
+            this.docxNoticeOverlay.classList.add('edp-active');
+        }
+
+        closeDocxNotice() {
+            if (this.docxNoticeOverlay) {
+                this.docxNoticeOverlay.classList.remove('edp-active');
+            }
+            if (!this.modal || !this.modal.classList.contains('edp-active')) {
+                document.body.classList.remove('edp-lock-scroll');
+            }
+            this.pendingDocxParams = null;
         }
 
         toggleFullscreen() {
@@ -275,8 +455,8 @@
             );
 
             fileLinks.forEach((link) => {
-                // GUARD: Strictly ignore links inside the preview modal dialog or marked internal
-                if (link.closest('#edp-previewer-overlay') || link.closest('.edp-modal-dialog')) return;
+                // GUARD: Strictly ignore links inside the preview modal or marked internal
+                if (link.closest('#edp-previewer-overlay') || link.closest('.edp-modal-dialog') || link.closest('#edp-docx-notice-overlay')) return;
                 if (link.dataset.edpInternal || link.classList.contains('edp-ignore-link')) return;
 
                 if (link.dataset.edpBound) return;
@@ -304,7 +484,17 @@
                 btn.addEventListener('click', (e) => {
                     e.preventDefault();
                     e.stopPropagation();
-                    this.open(btn.dataset.targetFileName, btn.dataset.targetFileExt, btn.dataset.targetFileUrl);
+
+                    const fileName = btn.dataset.targetFileName;
+                    const ext = (btn.dataset.targetFileExt || '').toLowerCase();
+                    const fileUrl = btn.dataset.targetFileUrl;
+
+                    // If file is DOCX, check if user already dismissed fidelity notice
+                    if ((ext === 'docx' || ext === 'doc') && localStorage.getItem('edp_docx_notice_dismissed') !== 'true') {
+                        this.showDocxNotice(fileName, ext, fileUrl);
+                    } else {
+                        this.open(fileName, ext, fileUrl);
+                    }
                 });
 
                 // Insert button BEFORE the link so it is never pushed off by text-overflow ellipsis
@@ -336,6 +526,7 @@
 
             this.modalTitle.textContent = this.currentFileName;
             this.btnDownload.href = this.currentFileUrl;
+            this.bannerBtnDownload.href = this.currentFileUrl;
             this.updateFormatBadge(this.currentFileType);
 
             // Lock background body scrolling so OJS layer panels do not scroll or close
@@ -347,7 +538,10 @@
             // Reset controls and display loading state
             this.viewerControls.style.display = 'none';
             this.viewerControls.innerHTML = '';
+            this.btnPrint.style.display = 'none';
             this.btnNewTab.style.display = 'none';
+            this.docxBanner.style.display = 'none';
+
             this.modalBody.innerHTML = `
                 <div class="edp-loading-indicator">
                     <div class="edp-spinner"></div>
@@ -411,7 +605,7 @@
                     this.updateFormatBadge(this.currentFileType);
 
                     // 3. Delegate to appropriate rendering engine
-                    if (this.currentFileType === 'docx') {
+                    if (this.currentFileType === 'docx' || this.currentFileType === 'doc') {
                         return response.arrayBuffer().then((buffer) => this.renderDocxBuffer(buffer));
                     } else if (this.currentFileType === 'pdf') {
                         return response.blob().then((blob) => this.renderPdfBlob(blob));
@@ -459,6 +653,10 @@
                 return;
             }
 
+            // Display DOCX top info banner and print button
+            this.docxBanner.style.display = 'flex';
+            this.btnPrint.style.display = 'inline-flex';
+
             this.modalBody.innerHTML = `
                 <div class="edp-viewport-docx">
                     <div class="edp-docx-scale-container" id="edp-docx-content"></div>
@@ -488,7 +686,7 @@
                 <button type="button" class="edp-ctrl-btn" id="edp-docx-zoom-out" title="${this.t('zoomOut', 'Zoom Out')}">-</button>
                 <span class="edp-zoom-level" id="edp-docx-zoom-label">100%</span>
                 <button type="button" class="edp-ctrl-btn" id="edp-docx-zoom-in" title="${this.t('zoomIn', 'Zoom In')}">+</button>
-                <button type="button" class="edp-ctrl-btn" id="edp-docx-fit" title="${this.t('fitWidth', 'Fit Width')}" style="width:auto; padding:0 6px; font-size:11px;">Fit</button>
+                <button type="button" class="edp-ctrl-btn" id="edp-docx-fit" title="${this.t('fitWidth', 'Fit Width')}">Fit</button>
             `;
 
             const zoomInBtn = document.getElementById('edp-docx-zoom-in');
@@ -567,7 +765,7 @@
                 <button type="button" class="edp-ctrl-btn" id="edp-img-zoom-out" title="${this.t('zoomOut', 'Zoom Out')}">-</button>
                 <span class="edp-zoom-level" id="edp-img-zoom-label">100%</span>
                 <button type="button" class="edp-ctrl-btn" id="edp-img-zoom-in" title="${this.t('zoomIn', 'Zoom In')}">+</button>
-                <button type="button" class="edp-ctrl-btn" id="edp-img-reset" title="${this.t('resetZoom', 'Reset')}" style="width:auto; padding:0 6px; font-size:11px;">Reset</button>
+                <button type="button" class="edp-ctrl-btn" id="edp-img-reset" title="${this.t('resetZoom', 'Reset')}">Reset</button>
             `;
 
             const zoomInBtn = document.getElementById('edp-img-zoom-in');
@@ -630,7 +828,7 @@
         renderError(title, message) {
             this.modalBody.innerHTML = `
                 <div class="edp-fallback-card">
-                    <svg class="edp-fallback-icon" style="color: #ef4444;" viewBox="0 0 24 24" fill="currentColor">
+                    <svg class="edp-fallback-icon" style="color: #dc2626;" viewBox="0 0 24 24" fill="currentColor">
                         <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/>
                     </svg>
                     <h4 class="edp-fallback-title">${title}</h4>
@@ -656,7 +854,9 @@
             this.modalBody.innerHTML = '';
             this.viewerControls.style.display = 'none';
             this.viewerControls.innerHTML = '';
+            this.btnPrint.style.display = 'none';
             this.btnNewTab.style.display = 'none';
+            this.docxBanner.style.display = 'none';
             this.formatBadge.style.display = 'none';
         }
     }
