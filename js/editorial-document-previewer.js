@@ -169,7 +169,7 @@
             this.btnPrint.addEventListener('click', (e) => {
                 e.preventDefault();
                 e.stopPropagation();
-                window.print();
+                this.printDocx();
             });
 
             this.btnFullscreen.addEventListener('click', (e) => {
@@ -182,7 +182,7 @@
             overlay.querySelector('#edp-banner-btn-print').addEventListener('click', (e) => {
                 e.preventDefault();
                 e.stopPropagation();
-                window.print();
+                this.printDocx();
             });
 
             overlay.querySelector('#edp-docx-banner-dismiss').addEventListener('click', (e) => {
@@ -672,21 +672,37 @@
                 ignoreHeight: false,
                 ignoreFonts: false,
                 breakPages: true,
+                ignoreLastRenderedPageBreak: false,
+                experimental: true,
                 trimXmlDeclaration: true,
+                renderHeaders: true,
+                renderFooters: true,
+                renderFootnotes: true,
+                renderEndnotes: true,
             }).then(() => {
-                this.setupDocxControls(contentContainer);
+                const pages = contentContainer.querySelectorAll('section.docx');
+                const pageCount = pages.length;
+                pages.forEach((page, idx) => {
+                    page.setAttribute('data-page-number', idx + 1);
+                });
+                this.setupDocxControls(contentContainer, pageCount);
             }).catch((err) => {
                 this.renderError('Unable to render DOCX preview', err.message);
             });
         }
 
-        setupDocxControls(container) {
+        setupDocxControls(container, pageCount) {
             this.viewerControls.style.display = 'inline-flex';
+            const pageBadge = pageCount > 1
+                ? `<span class="edp-page-count-badge" id="edp-docx-page-count">${pageCount} ${this.t('pages', 'Pages')}</span>`
+                : '';
+
             this.viewerControls.innerHTML = `
                 <button type="button" class="edp-ctrl-btn" id="edp-docx-zoom-out" title="${this.t('zoomOut', 'Zoom Out')}">-</button>
                 <span class="edp-zoom-level" id="edp-docx-zoom-label">100%</span>
                 <button type="button" class="edp-ctrl-btn" id="edp-docx-zoom-in" title="${this.t('zoomIn', 'Zoom In')}">+</button>
                 <button type="button" class="edp-ctrl-btn" id="edp-docx-fit" title="${this.t('fitWidth', 'Fit Width')}">Fit</button>
+                ${pageBadge}
             `;
 
             const zoomInBtn = document.getElementById('edp-docx-zoom-in');
@@ -710,8 +726,126 @@
             });
             fitBtn.addEventListener('click', (e) => {
                 e.stopPropagation();
+                const firstPage = container.querySelector('section.docx');
+                if (firstPage && this.modalBody) {
+                    const availableWidth = this.modalBody.clientWidth - 48;
+                    const pageWidth = firstPage.offsetWidth || 816;
+                    if (pageWidth > 0 && availableWidth > 0) {
+                        const fitScale = Math.min(Math.max(availableWidth / pageWidth, 0.4), 1.5);
+                        applyZoom(Math.round(fitScale * 10) / 10);
+                        return;
+                    }
+                }
                 applyZoom(1.0);
             });
+        }
+
+        printDocx() {
+            const docxContent = document.getElementById('edp-docx-content');
+            if (!docxContent) {
+                window.print();
+                return;
+            }
+
+            try {
+                const existingFrame = document.getElementById('edp-print-frame');
+                if (existingFrame && existingFrame.parentNode) {
+                    existingFrame.parentNode.removeChild(existingFrame);
+                }
+
+                const iframe = document.createElement('iframe');
+                iframe.id = 'edp-print-frame';
+                iframe.style.position = 'fixed';
+                iframe.style.top = '-10000px';
+                iframe.style.left = '-10000px';
+                iframe.style.width = '1000px';
+                iframe.style.height = '1000px';
+                iframe.style.border = '0';
+                document.body.appendChild(iframe);
+
+                const frameDoc = iframe.contentWindow.document;
+                const safeTitle = (this.currentFileName || 'Document').replace(/"/g, '&quot;');
+
+                frameDoc.open();
+                frameDoc.write(`<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>${safeTitle}</title>
+    <style>
+        @page {
+            size: auto;
+            margin: 10mm;
+        }
+        html, body {
+            margin: 0;
+            padding: 0;
+            background: #ffffff;
+            color: #000000;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            overflow: visible !important;
+        }
+        .docx-wrapper {
+            background: transparent !important;
+            padding: 0 !important;
+            margin: 0 !important;
+            display: block !important;
+        }
+        section.docx {
+            background: #ffffff !important;
+            box-shadow: none !important;
+            border: none !important;
+            box-sizing: border-box !important;
+            margin: 0 auto !important;
+            page-break-after: always !important;
+            break-after: page !important;
+        }
+        section.docx:last-of-type,
+        section.docx:last-child {
+            page-break-after: avoid !important;
+            break-after: avoid !important;
+        }
+        @media print {
+            html, body {
+                background: #ffffff !important;
+            }
+            section.docx {
+                page-break-after: always !important;
+                break-after: page !important;
+            }
+            section.docx:last-of-type,
+            section.docx:last-child {
+                page-break-after: avoid !important;
+                break-after: avoid !important;
+            }
+        }
+    </style>
+</head>
+<body>
+    ${docxContent.innerHTML}
+</body>
+</html>`);
+                frameDoc.close();
+
+                setTimeout(() => {
+                    try {
+                        iframe.contentWindow.focus();
+                        iframe.contentWindow.print();
+                    } catch (err) {
+                        console.warn('Iframe print error, falling back to window.print():', err);
+                        window.print();
+                    } finally {
+                        setTimeout(() => {
+                            if (iframe.parentNode) {
+                                iframe.parentNode.removeChild(iframe);
+                            }
+                        }, 2000);
+                    }
+                }, 300);
+            } catch (e) {
+                console.warn('Iframe creation failed, fallback to window.print():', e);
+                window.print();
+            }
         }
 
         /* -----------------------------------------------------------------

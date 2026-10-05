@@ -107,6 +107,7 @@ class EditorialDocumentPreviewerPlugin extends GenericPlugin
                     'docxNoticeRemember' => __('plugins.generic.editorialDocumentPreviewer.docxNoticeRemember'),
                     'docxNoticeBanner' => __('plugins.generic.editorialDocumentPreviewer.docxNoticeBanner'),
                     'printPdf' => __('plugins.generic.editorialDocumentPreviewer.printPdf'),
+                    'pages' => __('plugins.generic.editorialDocumentPreviewer.pages'),
                 ],
             ];
 

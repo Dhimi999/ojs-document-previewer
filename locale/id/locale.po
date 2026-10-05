@@ -1,8 +1,8 @@
 msgid ""
 msgstr ""
-"Project-Id-Version: editorialDocumentPreviewer 0.2.3.0\n"
+"Project-Id-Version: editorialDocumentPreviewer 0.2.4.0\n"
 "POT-Creation-Date: 2026-10-05 16:40+0700\n"
-"PO-Revision-Date: 2026-10-05 19:40+0700\n"
+"PO-Revision-Date: 2026-10-05 19:55+0700\n"
 "Last-Translator: Dhimas Rizky H\n"
 "Language-Team: Indonesian\n"
 "Language: id\n"
@@ -78,3 +78,6 @@ msgstr "Pratinjau cepat peramban. Untuk memeriksa tata letak 100% presisi, unduh
 
 msgid "plugins.generic.editorialDocumentPreviewer.printPdf"
 msgstr "Cetak / Simpan ke PDF"
+
+msgid "plugins.generic.editorialDocumentPreviewer.pages"
+msgstr "Halaman"

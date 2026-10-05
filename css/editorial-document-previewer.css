@@ -247,6 +247,19 @@ body.edp-lock-scroll {
     line-height: 26px;
 }
 
+.edp-page-count-badge {
+    display: inline-block;
+    padding: 0 8px;
+    font-size: 11px;
+    font-weight: 600;
+    color: #4b5563;
+    border-right: 1px solid #e5e7eb;
+    line-height: 26px;
+    user-select: none;
+    background: #f9fafb;
+    white-space: nowrap;
+}
+
 /* Toolbar Buttons */
 .edp-btn {
     display: inline-flex;
@@ -467,14 +480,22 @@ body.edp-lock-scroll {
 .edp-viewport-docx .docx-wrapper {
     background: transparent !important;
     padding: 0 !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
 }
 
 .edp-viewport-docx .docx {
     background: #ffffff !important;
-    margin: 0 auto 24px auto !important;
-    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.25) !important;
-    box-sizing: border-box;
+    margin: 0 auto 28px auto !important;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.28) !important;
+    box-sizing: border-box !important;
+    position: relative !important;
     max-width: 100%;
+}
+
+.edp-viewport-docx .docx:last-child {
+    margin-bottom: 28px !important;
 }
 
 .edp-viewport-docx .docx table {
@@ -777,30 +798,48 @@ body.edp-lock-scroll {
    ------------------------------------------------------------------------- */
 @media print {
     /* Hide all background website elements and OJS dashboard UI */
-    body * {
-        visibility: hidden !important;
+    body > *:not(.edp-modal-overlay) {
+        display: none !important;
     }
 
     /* Reset body */
-    body, html {
+    body.edp-lock-scroll,
+    body,
+    html {
         background: #ffffff !important;
         margin: 0 !important;
         padding: 0 !important;
         overflow: visible !important;
         height: auto !important;
+        position: static !important;
     }
 
     /* Hide modal chrome and overlays */
-    .edp-modal-overlay,
+    .edp-modal-overlay {
+        position: static !important;
+        width: 100% !important;
+        height: auto !important;
+        background: transparent !important;
+        padding: 0 !important;
+        margin: 0 !important;
+        opacity: 1 !important;
+        pointer-events: auto !important;
+        backdrop-filter: none !important;
+        -webkit-backdrop-filter: none !important;
+    }
+
     .edp-modal-dialog {
         position: static !important;
         width: 100% !important;
         height: auto !important;
+        max-width: none !important;
         background: transparent !important;
         box-shadow: none !important;
         border: none !important;
         padding: 0 !important;
         margin: 0 !important;
+        overflow: visible !important;
+        transform: none !important;
     }
 
     .edp-modal-header,
@@ -810,29 +849,26 @@ body.edp-lock-scroll {
     }
 
     /* Isolate and print rendered DOCX pages with vector clarity */
-    .edp-modal-body,
-    .edp-viewport-docx,
-    #edp-docx-content,
-    #edp-docx-content * {
-        visibility: visible !important;
-    }
-
     .edp-modal-body {
-        position: absolute !important;
-        left: 0 !important;
-        top: 0 !important;
+        position: static !important;
         width: 100% !important;
+        height: auto !important;
         background: #ffffff !important;
         padding: 0 !important;
         margin: 0 !important;
         overflow: visible !important;
+        display: block !important;
     }
 
     .edp-viewport-docx {
+        position: static !important;
+        width: 100% !important;
+        height: auto !important;
         background: #ffffff !important;
         padding: 0 !important;
         margin: 0 !important;
         overflow: visible !important;
+        display: block !important;
     }
 
     .edp-docx-scale-container {
@@ -841,15 +877,29 @@ body.edp-lock-scroll {
         margin: 0 !important;
     }
 
+    .edp-viewport-docx .docx-wrapper {
+        background: transparent !important;
+        padding: 0 !important;
+        margin: 0 !important;
+        display: block !important;
+    }
+
     .edp-viewport-docx .docx {
         box-shadow: none !important;
-        margin: 0 0 20mm 0 !important;
+        margin: 0 auto !important;
+        background: #ffffff !important;
         page-break-after: always !important;
         break-after: page !important;
     }
 
+    .edp-viewport-docx .docx:last-of-type,
+    .edp-viewport-docx .docx:last-child {
+        page-break-after: avoid !important;
+        break-after: avoid !important;
+    }
+
     @page {
         size: auto;
-        margin: 15mm;
+        margin: 10mm;
     }
 }
